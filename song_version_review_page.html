@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Song Version Review</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel-2: #1f2430;
+      --text: #f4f7fb;
+      --muted: #aab3c2;
+      --accent: #79c0ff;
+      --accent-2: #9bffb0;
+      --border: #2a3140;
+      --danger: #ff8b8b;
+      --shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0b0d11 0%, #12161d 100%);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #151925 0%, #1f2633 100%);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 2vw + 1rem, 3rem);
+      line-height: 1.05;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 800px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 20px 0 8px;
+    }
+
+    .controls input,
+    .controls select,
+    .controls button,
+    .notes textarea,
+    .version-card input[type="text"] {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.95rem;
+    }
+
+    .controls input,
+    .controls select {
+      min-width: 220px;
+      flex: 1;
+    }
+
+    .controls button,
+    .vote-btn,
+    .copy-btn {
+      cursor: pointer;
+      transition: transform 0.12s ease, opacity 0.12s ease, border-color 0.12s ease;
+    }
+
+    .controls button:hover,
+    .vote-btn:hover,
+    .copy-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .controls button.primary,
+    .vote-btn.selected {
+      background: var(--accent);
+      color: #071019;
+      border-color: transparent;
+      font-weight: 700;
+    }
+
+    .controls button.secondary,
+    .copy-btn {
+      background: transparent;
+      color: var(--text);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .version-card {
+      background: linear-gradient(180deg, #171b24 0%, #141821 100%);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 390px;
+    }
+
+    .version-top {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(121, 192, 255, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(121, 192, 255, 0.25);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .version-title {
+      margin: 10px 0 4px;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .version-subtitle {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      font-size: 0.82rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .notes {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .notes label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .notes textarea {
+      width: 100%;
+      min-height: 88px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .vote-btn,
+    .copy-btn {
+      border-radius: 12px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      font-size: 0.92rem;
+    }
+
+    .summary {
+      margin-top: 26px;
+      background: linear-gradient(180deg, #151a22 0%, #12161d 100%);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .summary h2 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .summary p,
+    .summary li {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .summary strong {
+      color: var(--text);
+    }
+
+    .empty {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    @media (max-width: 700px) {
+      .wrap { padding: 18px 14px 42px; }
+      .hero { padding: 20px; border-radius: 18px; }
+      .version-card { border-radius: 18px; }
+      .summary { border-radius: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <span class="badge">Song Review Page</span>
+      <h1>Pick the best version</h1>
+      <p>
+        Drop in each mix, demo, or alternate vocal and let the writer compare them in one place.
+        This page is set up for quick listening, notes, and a final pick.
+      </p>
+
+      <div class="controls">
+        <input id="songName" type="text" value="Untitled Song" placeholder="Song title" />
+        <select id="sortMode">
+          <option value="default">Sort: Original order</option>
+          <option value="title">Sort: Title A-Z</option>
+          <option value="selected">Sort: Selected first</option>
+        </select>
+        <button class="primary" onclick="renderVersions()">Refresh View</button>
+        <button class="secondary" onclick="copySummary()">Copy Review Summary</button>
+      </div>
+    </section>
+
+    <section class="grid" id="versionGrid"></section>
+
+    <section class="summary">
+      <h2>Writer decision summary</h2>
+      <div id="summaryOutput"></div>
+    </section>
+  </div>
+
+  <script>
+    const versions = [
+      {
+        id: 1,
+        title: 'Version 1',
+        label: 'Original Demo',
+        src: 'songs/version-1.mp3',
+        style: 'Warm acoustic / soft rock',
+        notes: '',
+        selected: false,
+      },
+      {
+        id: 2,
+        title: 'Version 2',
+        label: 'Alt Vocal',
+        src: 'songs/version-2.mp3',
+        style: 'Softer vocal / slightly wider mix',
+        notes: '',
+        selected: false,
+      },
+      {
+        id: 3,
+        title: 'Version 3',
+        label: 'Fuller Arrangement',
+        src: 'songs/version-3.mp3',
+        style: 'Bigger drums / more lift',
+        notes: '',
+        selected: false,
+      }
+    ];
+
+    function sortedVersions() {
+      const sortMode = document.getElementById('sortMode').value;
+      const copy = [...versions];
+
+      if (sortMode === 'title') {
+        return copy.sort((a, b) => a.title.localeCompare(b.title));
+      }
+
+      if (sortMode === 'selected') {
+        return copy.sort((a, b) => Number(b.selected) - Number(a.selected) || a.id - b.id);
+      }
+
+      return copy.sort((a, b) => a.id - b.id);
+    }
+
+    function renderVersions() {
+      const grid = document.getElementById('versionGrid');
+      grid.innerHTML = '';
+
+      sortedVersions().forEach((version) => {
+        const card = document.createElement('article');
+        card.className = 'version-card';
+
+        card.innerHTML = `
+          <div class="version-top">
+            <div>
+              <span class="badge">${escapeHtml(version.label)}</span>
+              <div class="version-title">${escapeHtml(version.title)}</div>
+              <div class="version-subtitle">${escapeHtml(version.style)}</div>
+            </div>
+          </div>
+
+          <audio controls preload="none">
+            <source src="${escapeAttribute(version.src)}" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+
+          <div class="meta">
+            <span class="pill">MP3 / WAV link supported</span>
+            <span class="pill">Private review</span>
+          </div>
+
+          <div class="notes">
+            <label for="notes-${version.id}">Writer Notes</label>
+            <textarea id="notes-${version.id}" placeholder="What works here? Vocal? Hook? Mix? Emotion?" oninput="updateNotes(${version.id}, this.value)">${escapeHtml(version.notes)}</textarea>
+          </div>
+
+          <div class="card-actions">
+            <button class="vote-btn ${version.selected ? 'selected' : ''}" onclick="selectVersion(${version.id})">
+              ${version.selected ? 'Selected Winner' : 'Pick This Version'}
+            </button>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+
+      updateSummary();
+    }
+
+    function updateNotes(id, value) {
+      const version = versions.find(v => v.id === id);
+      if (version) {
+        version.notes = value;
+        updateSummary();
+      }
+    }
+
+    function selectVersion(id) {
+      versions.forEach(v => {
+        v.selected = v.id === id ? !v.selected : false;
+      });
+      renderVersions();
+    }
+
+    function updateSummary() {
+      const output = document.getElementById('summaryOutput');
+      const songName = document.getElementById('songName').value.trim() || 'Untitled Song';
+      const selected = versions.find(v => v.selected);
+      const noted = versions.filter(v => v.notes.trim());
+
+      let html = `<p><strong>Song:</strong> ${escapeHtml(songName)}</p>`;
+
+      if (selected) {
+        html += `<p><strong>Current pick:</strong> ${escapeHtml(selected.title)} <span class="pill">${escapeHtml(selected.label)}</span></p>`;
+      } else {
+        html += `<p class="empty">No version selected yet.</p>`;
+      }
+
+      if (noted.length) {
+        html += '<ul>';
+        noted.forEach(v => {
+          html += `<li><strong>${escapeHtml(v.title)}:</strong> ${escapeHtml(v.notes)}</li>`;
+        });
+        html += '</ul>';
+      } else {
+        html += '<p>No notes added yet.</p>';
+      }
+
+      output.innerHTML = html;
+    }
+
+    function copySummary() {
+      const songName = document.getElementById('songName').value.trim() || 'Untitled Song';
+      const selected = versions.find(v => v.selected);
+      const lines = [`Song: ${songName}`];
+
+      if (selected) {
+        lines.push(`Selected Version: ${selected.title} (${selected.label})`);
+      } else {
+        lines.push('Selected Version: None yet');
+      }
+
+      versions.forEach(v => {
+        if (v.notes.trim()) {
+          lines.push(`${v.title}: ${v.notes.trim()}`);
+        }
+      });
+
+      navigator.clipboard.writeText(lines.join('\n'))
+        .then(() => alert('Review summary copied.'))
+        .catch(() => alert('Could not copy summary.'));
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeAttribute(str) {
+      return escapeHtml(str).replace(/`/g, '&#096;');
+    }
+
+    renderVersions();
+  </script>
+</body>
+</html>
